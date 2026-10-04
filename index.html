@@ -423,8 +423,6 @@ function renderHome(){
     card.innerHTML = `
       <div class="eyebrow">Exam ${ex.id}</div>
       <div class="route">${ex.from} &rarr; ${ex.to}</div>
-      <div class="meta">${ex.dist} · ${ex.track}</div>
-      <div class="themes">${ex.themes}</div>
       <div class="versions">
         <button type="button" data-ex="${ex.id}" data-v="a">Version A</button>
         <button type="button" class="ghost" data-ex="${ex.id}" data-v="b">Version B</button>
