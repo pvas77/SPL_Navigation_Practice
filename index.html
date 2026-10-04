@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SPL Nav Practice</title>
+<meta name="description" content="Mock navigation papers for the UK SPL theory exam, each built around a task plotted on the Southern England & Wales 1:500 000 chart.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one exam-paper column; home screen is a grid of route cards; sticky marking bar */
+:root{
+  --bg:#f6f4ee; --panel:#ffffff; --fg:#1f2430; --muted:#5d6472; --rule:#d9d4c6;
+  --accent:#7a1f8a; --accent-soft:#f1e4f4; --blue:#2e5aa8;
+  --ok:#2f7a3f; --ok-soft:#e3f1e5; --bad:#b4322a; --bad-soft:#f8e4e2;
+  --display:"Barlow Condensed","Arial Narrow",sans-serif;
+  --body:"Source Sans 3","Segoe UI",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#171a21;--panel:#1f232d;--fg:#ece9e0;--muted:#a3a8b4;--rule:#363b47;
+  --accent:#d08ad9;--accent-soft:#3a2440;--blue:#8fb0ea;
+  --ok:#7fcf8f;--ok-soft:#1f3a26;--bad:#f09088;--bad-soft:#44221f;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#171a21;--panel:#1f232d;--fg:#ece9e0;--muted:#a3a8b4;--rule:#363b47;
+  --accent:#d08ad9;--accent-soft:#3a2440;--blue:#8fb0ea;
+  --ok:#7fcf8f;--ok-soft:#1f3a26;--bad:#f09088;--bad-soft:#44221f;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.5;padding-top:env(safe-area-inset-top,0px)}
+.wrap{max-width:780px;margin:0 auto;padding-inline:16px;padding-block:24px 96px}
+h1{font-family:var(--display);font-weight:700;font-size:clamp(34px,6vw,50px);line-height:1;margin:0 0 6px;text-wrap:balance}
+h2{font-family:var(--display);font-weight:600;font-size:26px;margin:36px 0 12px;border-bottom:2px solid var(--accent);padding-bottom:4px;text-wrap:balance}
+h3{font-family:var(--display);font-size:20px;margin:0 0 8px}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+p{margin:0 0 12px}
+.note{font-size:14px;color:var(--muted)}
+a{color:var(--accent)}
+button{font-family:var(--display);font-size:18px;font-weight:600;letter-spacing:.02em;padding:8px 18px;border:2px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer}
+button.ghost{background:transparent;color:var(--accent)}
+button.small{font-size:15px;padding:5px 12px}
+button:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+button:disabled{opacity:.5;cursor:default}
+
+/* home */
+.cards{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));margin-top:20px}
+.card{background:var(--panel);border:1px solid var(--rule);border-top:5px solid var(--accent);padding:16px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.card .route{font-family:var(--display);font-size:24px;font-weight:600;line-height:1.1}
+.card .meta{font-family:var(--mono);font-size:13px;color:var(--muted)}
+.card .themes{font-size:14px;flex:1}
+.card .versions{display:flex;gap:8px;flex-wrap:wrap}
+.card .versions button{flex:1}
+.best{font-family:var(--mono);font-size:12px;color:var(--muted)}
+
+/* paper */
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.brief{background:var(--panel);border:1px solid var(--rule);border-left:5px solid var(--accent);padding:16px 18px;margin:16px 0 8px}
+.brief dl{display:grid;grid-template-columns:max-content 1fr;gap:4px 14px;margin:10px 0 0;font-size:15px}
+.brief dt{font-family:var(--mono);font-size:13px;color:var(--muted)}
+.brief dd{margin:0;font-variant-numeric:tabular-nums}
+.q{background:var(--panel);border:1px solid var(--rule);padding:14px 16px;margin:0 0 12px}
+.q header{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.q .n{font-family:var(--mono);color:var(--accent);font-weight:500;min-width:28px}
+.q .stem{font-weight:600;flex:1;min-width:200px}
+.tag{font-family:var(--mono);font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);border:1px solid var(--rule);padding:0 6px;white-space:nowrap}
+.opts{display:grid;gap:6px;margin:10px 0 0;padding:0;list-style:none}
+.opts label{display:flex;gap:10px;align-items:flex-start;padding:7px 10px;border:1px solid var(--rule);cursor:pointer;min-width:0}
+.opts label:hover{border-color:var(--accent)}
+.opts input{margin-top:5px;accent-color:var(--accent);flex-shrink:0}
+.opts input:focus-visible+span{outline:2px solid var(--accent);outline-offset:2px}
+.q.right .opts label.sel{border-color:var(--ok);background:var(--ok-soft)}
+.q.wrong .opts label.sel{border-color:var(--bad);background:var(--bad-soft)}
+.q.marked .opts label.key{border-color:var(--ok);box-shadow:inset 3px 0 0 var(--ok)}
+.exp{margin-top:10px;padding:10px 12px;background:var(--accent-soft);font-size:15px;border-left:3px solid var(--accent)}
+.exp b{font-family:var(--mono);font-size:13px;letter-spacing:.04em}
+.bar{position:fixed;left:0;right:0;bottom:0;background:var(--panel);border-top:1px solid var(--rule);padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px))}
+.bar .inner{max-width:780px;margin:0 auto;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.score{font-family:var(--mono);font-size:15px;font-variant-numeric:tabular-nums}
+.score strong{font-size:20px}
+.breakdown{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:14px 0}
+.breakdown div{background:var(--panel);border:1px solid var(--rule);padding:8px 10px;font-size:14px}
+.breakdown b{display:block;font-family:var(--mono);font-size:18px}
+[hidden]{display:none!important}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<section id="home">
+  <div class="eyebrow">UK SPL theory · Navigation</div>
+  <h1>SPL Nav Practice</h1>
+  <p>Three plotted tasks on the Southern England &amp; Wales 1:500 000 chart (sheet 2171CD, Ed. 52). Each task has two 20-question papers with different wind and pressure, so the arithmetic is fresh each time. Topics follow the real paper: plotting and wind triangle, navigation technique, airspace, radio and rules, altimetry, and glide calculations.</p>
+  <p class="note">Plot the task on your own chart first and measure everything yourself. Airspace answers are drawn from the UK AIP (AIRAC Oct 2026) rather than a scan of the printed sheet; where your chart or current NOTAMs disagree, they win. Pass mark 75%.</p>
+  <div class="cards" id="cards"></div>
+</section>
+
+<section id="paper" hidden>
+  <div class="topbar">
+    <button class="ghost small" id="back" type="button">&larr; All papers</button>
+    <span class="eyebrow" id="paperLabel"></span>
+  </div>
+  <h1 id="paperTitle"></h1>
+  <div class="brief" id="brief"></div>
+  <div id="result" hidden></div>
+  <div id="questions"></div>
+</section>
+
+</div>
+
+<div class="bar" id="bar" hidden><div class="inner">
+  <div class="score" id="score"></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <button class="ghost" id="reset" type="button">Clear</button>
+    <button id="mark" type="button">Mark the paper</button>
+  </div>
+</div></div>
+
+<script>
+const EXAMS = [];
+
+/* ===================== EXAM 1 : Husbands Bosworth -> Gransden Lodge ===================== */
+EXAMS.push({
+ id:"1", from:"Husbands Bosworth", to:"Gransden Lodge", dist:"37 NM · 69 km", track:"114°(T)",
+ themes:"Daventry CTA steps (Class A and C), London TMA at the destination, 1-in-60 corrections, final glides from Grafham Water.",
+ plot:"Draw a straight line from <strong>Husbands Bosworth</strong> glider site (52°26'N 001°03'W, south-west of Market Harborough) to <strong>Gransden Lodge</strong> glider site (52°11'N 000°07'W, west of Cambridge). Measure distance (NM and km) and true track; read the variation from the nearest isogonal; note every town, water, road, railway, obstruction and piece of airspace within about 10 km of the line.",
+ common:[["Glider","Two-seat trainer, best glide 30:1 at 50 kt; cruise 55 kt (treat IAS = TAS)"],["Elevations","Husbands Bosworth 509 ft AMSL · Gransden Lodge 230 ft AMSL"],["Variation","1°E"],["Tolerances","Distance ±2 NM, track ±3°, heights ±100 ft"]],
+ versions:{
+ a:{ data:[["Wind","090°(T) / 15 kt at all heights"],["Pressure","QNH 995 hPa everywhere (30 ft per hPa)"],["Day","Saturday, mid-afternoon"]],
+  qs:[
+  {t:"Plotting",q:"What is the straight-line distance from Husbands Bosworth to Gransden Lodge?",o:["29 NM (54 km)","37 NM (69 km)","45 NM (83 km)","52 NM (96 km)"],a:1,
+   e:"Against the NM scale, or the latitude scale on a meridian (1 minute of latitude = 1 NM), the line is 37.4 NM = 69 km. Keep the km and NM scales apart."},
+  {t:"Plotting",q:"What is the true track?",o:["096°(T)","104°(T)","114°(T)","124°(T)"],a:2,
+   e:"Protractor on a meridian near mid-track, read clockwise from true north: about 114°(T). The track bends under 1° over this distance, so a single mid-point reading is fine."},
+  {t:"Plotting",q:"Wind 090°/15 kt, TAS 55 kt. What true heading makes good the track?",o:["108°(T)","114°(T)","120°(T)","102°(T)"],a:0,
+   e:"Wind is 24° left of the nose. Crosswind = 15 × sin 24° ≈ 6 kt; WCA = sin⁻¹(6/55) ≈ 6° into wind (left). 114° − 6° = 108°(T), about 107°(M). Wind from the left, so heading is less than track."},
+  {t:"Plotting",q:"What ground speed and time en route result (no thermalling)?",o:["55 kt, 41 min","41 kt, 55 min","70 kt, 32 min","36 kt, 62 min"],a:1,
+   e:"Headwind component = 15 × cos 24° ≈ 14 kt, so GS ≈ 55 − 14 = 41 kt. Time = 37.4 ÷ 41 × 60 ≈ 55 min. Expect to spend as long again circling."},
+  {t:"Technique",q:"For the middle third of the task you want a line feature to 'handrail' along. Which one runs roughly parallel to your track, 3–5 km to the left (north), from Kettering to Huntingdon?",o:["The M1","The A14 dual carriageway","The East Coast Main Line","The River Great Ouse"],a:1,
+   e:"The A14 runs Kettering–Thrapston–Huntingdon almost parallel to your line. A handrail you keep at a known offset tells you both that you are on heading and roughly how far you have drifted. The M1 is behind you; the ECML and Ouse cross your track rather than run with it."},
+  {t:"Technique",q:"You want a positive fix about 10 NM before Gransden to start your final-glide arithmetic. Which gives the least ambiguous fix?",o:["The town of St Neots on its own","The point where the A1, the River Great Ouse and the East Coast Main Line cross your track together near St Neots","Any field with a wind farm beside it","The A428 road"],a:1,
+   e:"Where several line features cross your track at one spot you get an unmistakable point fix. A town alone is a large, fuzzy target; wind farms and minor roads are easily confused with others."},
+  {t:"Technique",q:"You planned to pass Grafham Water with it 3 NM off your left wing, but it passes directly beneath you with 10 NM to run. By the 1-in-60 rule, how much should you alter heading to arrive over Gransden?",o:["3° right","9° right","18° right","36° right"],a:2,
+   e:"You are 3 NM left of track with 10 NM to go. Closing angle = 3 ÷ 10 × 60 = 18°, applied towards track (right). A big correction this late is normal; the lesson is to check drift earlier using the A14 handrail."},
+  {t:"Technique",q:"Why is a large reservoir such as Pitsford Water a better checkpoint than a village of similar size on the chart?",o:["Reservoirs are always on the track line","Water is unique in shape, visible from a long way off and cannot be confused with its neighbours; villages all look alike from 3000 ft","Villages are not shown on the half-million chart","Reservoirs mark the boundary of controlled airspace"],a:1,
+   e:"Good checkpoints are unique, conspicuous and hard to misidentify. Water, large road junctions, railway crossings and distinctive hills qualify; small towns and villages are the classic source of nav errors."},
+  {t:"Airspace",q:"Overhead Husbands Bosworth, what is the base and class of the controlled airspace above you?",o:["Daventry CTA, Class A, base FL75","Daventry CTA, Class A, base FL105","London TMA, Class A, base 5500 ft","Daventry CTA, Class D, base FL55"],a:0,
+   e:"Husbands Bosworth sits under Daventry CTA 13, Class A from FL75. A few km east the boundary with CTA 12 raises the base to FL105. Class A is outlined in solid magenta with FL figures."},
+  {t:"Airspace",q:"Over Kettering, Rushden and Thrapston, what is the lowest controlled airspace above you?",o:["Class A, base FL75","Class A, base FL105","Class D, base 3500 ft","Class C, base FL75"],a:1,
+   e:"The middle third is under Daventry CTA 12, Class A from FL105. East Midlands CTA 16 (Class D, FL75–FL105) comes down to a point near Market Harborough but your line passes just south of it. Check that vertex on your sheet."},
+  {t:"Airspace",q:"Overhead Gransden Lodge itself, what is the base of controlled airspace?",o:["FL75, Class C","FL105, Class A","5500 ft altitude, Class A (London TMA)","4500 ft altitude, Class D (Luton CTA)"],a:2,
+   e:"The site is just inside the north-west corner of London TMA 9: Class A from 5500 ft ALT. A few hundred metres north the base jumps to FL75. The base is an altitude, so it moves with QNH, unlike the FL bases further west."},
+  {t:"Airspace",q:"Over Grafham Water and St Neots the airspace above FL75 is Class C. What are the rules for a glider?",o:["VFR not permitted under any circumstances","Freely available to gliders, no radio needed","Entry only with an ATC clearance, and normally a Mode S transponder","Available below FL100 without clearance"],a:2,
+   e:"Class C permits VFR only with a clearance, two-way radio and (UK) a transponder unless exempted. A glider without a transponder treats FL75 as a hard ceiling, exactly as it would Class A."},
+  {t:"Airspace",q:"How many EG danger areas does the direct track cross?",o:["One, D206 Stanford","Two, D201 and D206","None; the nearest are over 50 km away","One, D215 North Luffenham"],a:2,
+   e:"No danger, restricted or prohibited area lies on or near this line. D206/207 Stanford are ~70 km east; D215 was withdrawn in 2025. Temporary restrictions for events still appear by NOTAM only."},
+  {t:"Radio & rules",q:"Is there any point on the direct track where you are legally required to contact an ATC unit?",o:["Yes, Wittering Zone abeam Kettering","Yes, Cambridge Approach before descending below 3000 ft","No. The whole route is in Class G below controlled airspace; contact is mandatory only to enter an ATZ or controlled airspace","Yes, London Control for a Daventry CTA crossing"],a:2,
+   e:"Flight in Class G needs no radio. Calling London Information for a Basic Service and calling Gransden Lodge Radio 131.280 before joining are airmanship, not law."},
+  {t:"Radio & rules",q:"You would like a Basic Service for the middle of the task. Which unit is realistic?",o:["Wittering LARS 119.680","London Information 124.600; no LARS unit covers this corridor","Cambridge Radar 120.965 from Kettering onwards","Luton Radar 129.550"],a:1,
+   e:"East Midlands (134.180) covers the HB end and Farnborough North starts south of Gransden, but the middle falls between LARS units; Wittering and Cambridge are not LARS. London Information 124.600 gives a Basic Service along the whole line."},
+  {t:"Altimetry",q:"The Daventry CTA base over HB is FL75 and QNH is 995 hPa. At what altitude is FL75 today?",o:["7500 ft","7050 ft","6960 ft","8040 ft"],a:2,
+   e:"1013 − 995 = 18 hPa × 30 ft = 540 ft. Low pressure brings the flight level down: 7500 − 540 = 6960 ft altitude. On a low-pressure day the Class A is closer than the chart figure suggests."},
+  {t:"Altimetry",q:"En route, which altimeter setting lets you compare your reading directly with chart elevations, obstruction heights and the 5500 ft ALT TMA base?",o:["QFE of the departure airfield","QNH (aerodrome QNH or the Regional Pressure Setting)","1013 hPa standard","Any setting, the chart shows AGL figures"],a:1,
+   e:"QNH gives altitude AMSL, the datum for terrain, obstructions and altitude-based airspace. The RPS is the lowest forecast QNH so it over-reads terrain clearance slightly; near an altitude-based base prefer a local aerodrome QNH."},
+  {t:"Glide",q:"A 30:1 glider in still air loses roughly how much height per nautical mile?",o:["100 ft","200 ft","300 ft","600 ft"],a:1,
+   e:"6076 ft ÷ 30 ≈ 203 ft per NM. Carry '200 ft a mile' in your head for quick final-glide checks."},
+  {t:"Glide",q:"Still air. Over the Grafham Water dam, 10 NM from Gransden (230 ft). What altitude (QNH) do you need to arrive 1000 ft above the airfield?",o:["2000 ft","2250 ft","3250 ft","4100 ft"],a:2,
+   e:"Height loss = 10 × 203 ≈ 2025 ft. Arrival altitude = 230 + 1000 = 1230 ft. Required ≈ 3250 ft QNH, comfortably below the FL75 base above Grafham."},
+  {t:"Glide",q:"Now add today's 14 kt headwind on the final glide flown at 50 kt. From the same 10 NM point, what altitude (QNH) do you need?",o:["3250 ft","3600 ft","4100 ft","4900 ft"],a:2,
+   e:"GS = 50 − 14 = 36 kt, effective glide = 30 × 36/50 ≈ 22:1. Loss = 10 × 6076 ÷ 22 ≈ 2800 ft; plus 1230 ft arrival = ~4050–4100 ft QNH. The headwind has cost about 800 ft over 10 NM."}
+  ]},
+ b:{ data:[["Wind","230°(T) / 20 kt at all heights"],["Pressure","QNH 1021 hPa everywhere (30 ft per hPa)"],["Day","Sunday, early afternoon"]],
+  qs:[
+  {t:"Plotting",q:"You have mislaid your scale rule. How can you still measure the task distance accurately on the chart?",o:["Use the longitude scale along the top edge: 1 minute of longitude = 1 NM","Use the latitude scale on a meridian: 1 minute of latitude = 1 NM","Count the 10 km grid squares","Compare with the length of a known motorway"],a:1,
+   e:"Minutes of latitude are a constant 1 NM anywhere on the chart. Minutes of longitude shrink with latitude (about 0.6 NM at 52°N), so never use them for distance."},
+  {t:"Plotting",q:"Wind 230°/20 kt, TAS 55 kt. What heading (true and magnetic) makes good 114°(T)?",o:["095°(T) / 094°(M)","114°(T) / 113°(M)","133°(T) / 132°(M)","152°(T) / 151°(M)"],a:2,
+   e:"Wind is 116° right of track, i.e. from behind-right. Crosswind = 20 × sin 116° ≈ 18 kt; WCA = sin⁻¹(18/55) ≈ 19° into wind (right). 114 + 19 = 133°(T); minus 1°E variation = 132°(M)."},
+  {t:"Plotting",q:"What ground speed results?",o:["35 kt","47 kt","61 kt","75 kt"],a:2,
+   e:"Tailwind component = 20 × cos 116° ≈ −9 kt (a tailwind). GS ≈ 55 × cos 19° + 9 ≈ 52 + 9 = 61 kt."},
+  {t:"Plotting",q:"Time en route at that ground speed, ignoring thermalling?",o:["27 min","37 min","47 min","55 min"],a:1,
+   e:"37.4 NM ÷ 61 kt × 60 ≈ 37 min. Write ETAs for each checkpoint on your plog before launch; it is the first thing you check when a feature fails to appear."},
+  {t:"Technique",q:"Why should you choose a positive checkpoint 5–10 minutes after setting course (here, the A6 and Midland Main Line south of Market Harborough)?",o:["To confirm heading and drift early, when any error is still small and cheap to correct","Because the first checkpoint is where you set QNH","To allow the GPS to acquire satellites","Because the exam requires a fix every 10 minutes"],a:0,
+   e:"An early fix proves your heading and the forecast wind. A 5° error caught at 5 NM costs nothing; the same error found at Gransden is 3 NM off track under a 5500 ft TMA base."},
+  {t:"Technique",q:"Crossing the River Nene near Thrapston at mid-task gives you what kind of information?",o:["A complete point fix of position","A line of position: it confirms along-track progress and ETA, but not how far you are left or right of track","Only your height above ground","Nothing useful: rivers are unreliable features"],a:1,
+   e:"A single line feature crossed at an angle fixes you along it, not across it. Combine it with a second feature (the A14 handrail, or where the Nene passes Thrapston) to get a point fix."},
+  {t:"Technique",q:"After 20 NM you find yourself 2 NM right (south) of track with 17 NM to go. Using the 1-in-60 rule, what heading change regains track by Gransden?",o:["6° left","13° left","20° left","3° left"],a:1,
+   e:"Track error = 2 ÷ 20 × 60 = 6°. Closing angle = 2 ÷ 17 × 60 ≈ 7°. Total correction ≈ 13° left: 6° to stop the divergence and 7° to converge."},
+  {t:"Technique",q:"With wind from 230°, which way will you drift if you fly track as heading, and what does that bring closer?",o:["Left (north-east), towards Grafham Water and the A14; no airspace until Wittering 20 km further on","Right (south), towards Cranfield ATZ and the Luton CTAs","No drift: the wind is a pure tailwind","Left, straight into the Luton CTA"],a:0,
+   e:"Wind from behind-right pushes you left (north). On this route the north side is benign; the hazardous side is south (Cranfield ATZ, Luton Class D). Knowing which side is 'safe' is part of planning."},
+  {t:"Airspace",q:"East Midlands CTA 16 (Class D, FL75–FL105) lies just north of your line near Market Harborough. What does a glider need to enter Class D?",o:["Nothing; Class D is open to VFR traffic","An ATC clearance and two-way radio; a transponder only if it is also a TMZ","A transponder only","A flight plan filed one hour in advance"],a:1,
+   e:"Class D: VFR permitted with a clearance and continuous two-way radio with the controlling unit. A transponder is not legally required in Class D unless it is a TMZ, though many units will not clear you without one."},
+  {t:"Airspace",q:"Does the direct track pass through any Luton (Class D) airspace?",o:["Yes, Luton CTA 7 from Bedford to St Neots","Yes, Luton CTA 6 over Grafham Water","No; the nearest Luton CTA edge is ~14 km south of St Neots near Sandy and Biggleswade","No; Luton airspace is only south of the M25"],a:2,
+   e:"The Luton CTAs (3500–5500 ft, blue on the chart) top out around Sandy/Biggleswade and south of Bedford. They matter if you drift right in a northerly, not on the direct line. Draw their northern edge on your chart."},
+  {t:"Airspace",q:"Which ATZs does the direct track penetrate?",o:["Cranfield ATZ","Wittering MATZ and ATZ","Sywell ATZ","None; the nearest (Cranfield, Wittering) are more than 15 km off track"],a:3,
+   e:"Cranfield (2 NM, SFC–2000 ft AAL) is ~20 km south; Wittering's MATZ ~22 km north. Wyton no longer has an ATZ, Little Gransden has none. Check Ed. 52 for anything new."},
+  {t:"Airspace",q:"The glider-site symbol at Gransden Lodge carries the figure 3.3. What does it mean?",o:["3.3 km circuit radius","Launches take place to about 3300 ft AMSL","Site elevation 330 ft","Winch cable 3.3 km long"],a:1,
+   e:"The figure beside a glider launch site is the altitude (thousands of feet AMSL) to which launching takes place. A cable at 3000 ft AGL is a serious hazard for an arriving glider: call before joining and keep clear of the launch line."},
+  {t:"Airspace",q:"Old Warden (Shuttleworth) is ~15 km south of Gransden. What is the status of its ATZ?",o:["Permanent ATZ, 2 NM to 2000 ft","Active only when notified by NOTAM, typically on display days","No ATZ ever","Permanent MATZ"],a:1,
+   e:"Old Warden's ATZ is NOTAM-activated, often with a RA(T) on display days. The chart alone is not enough: the NOTAM brief is part of navigation."},
+  {t:"Radio & rules",q:"RAF Wittering's MATZ lies north of track. If you drifted into it, what applies to a civil glider?",o:["MATZ penetration is mandatory for all aircraft","Not legally mandatory for civil aircraft, but the ATZ at its core is, and you should call Wittering Zone 119.680","MATZs do not apply at weekends","Gliders are exempt from both MATZ and ATZ"],a:1,
+   e:"A MATZ has no legal status for civil aircraft; the ATZ inside it (2.5 NM, 2000 ft AAL) is mandatory. Fast-jet traffic makes a call good airmanship."},
+  {t:"Radio & rules",q:"A parachute symbol with FL150 is shown at Sibson, 30 km north of track. What does it tell you?",o:["Free-fall parachuting to FL150; keep clear and listen on the DZ frequency","It is a danger area and entry is forbidden","Parachuting only below 1500 ft","Microlight site with circuits to 1500 ft"],a:0,
+   e:"Drop zones are advisory, not controlled airspace, but canopies and jump aircraft descending from FL150 are a real hazard. Sibson Radio 120.330."},
+  {t:"Altimetry",q:"What is the transition altitude as you approach Gransden Lodge under the London TMA?",o:["3000 ft","4000 ft","5000 ft","6000 ft"],a:3,
+   e:"Within and beneath the London TMA the transition altitude is 6000 ft; elsewhere in Class G it is 3000 ft. At 5000 ft approaching Gransden you stay on QNH, which is what you need to judge the 5500 ft ALT base."},
+  {t:"Altimetry",q:"QNH is 1021 hPa. At what altitude is the FL75 Class A base over Husbands Bosworth today?",o:["7500 ft","7260 ft","7740 ft","8100 ft"],a:2,
+   e:"1021 − 1013 = 8 hPa × 30 = 240 ft. High pressure lifts the flight level: 7500 + 240 = 7740 ft altitude. You gain a little room on a high-pressure day, but keep a 500 ft margin anyway."},
+  {t:"Glide",q:"Final glide at 50 kt with today's 9 kt tailwind component. From the Grafham dam (10 NM) to arrive 1000 ft above Gransden, what altitude (QNH) do you need?",o:["3250 ft","2950 ft","4100 ft","2300 ft"],a:1,
+   e:"GS = 50 + 9 = 59 kt, effective glide = 30 × 59/50 ≈ 35:1 (about 172 ft/NM). Loss = 1720 ft; plus 1230 ft arrival = ~2950 ft QNH."},
+  {t:"Glide",q:"Crossing St Neots (6 NM to run) at 2500 ft QNH with the same tailwind, roughly how high will you arrive over Gransden Lodge?",o:["About 1250 ft above the airfield","About 1050 ft above the airfield","About 500 ft above the airfield","You will not reach the airfield"],a:0,
+   e:"6 × 172 ≈ 1030 ft lost. 2500 − 1030 = 1470 ft AMSL, minus 230 ft elevation ≈ 1240 ft above the airfield. Enough for a normal join."},
+  {t:"Glide",q:"How should you adjust speed on a final glide with a tailwind?",o:["Fly faster than best-glide speed","Fly slightly slower than best-glide speed, but never below minimum-sink speed","Fly exactly best-glide speed; wind does not change it","Fly at the never-exceed speed"],a:1,
+   e:"With a tailwind the optimum is a little slower than still-air Vbg (slide the polar's origin the other way). The gain is small; do not trade it for a stall margin."}
+  ]}
+ }
+});
+
+/* ===================== EXAM 2 : Nympsfield -> Bidford ===================== */
+EXAMS.push({
+ id:"2", from:"Nympsfield", to:"Bidford", dist:"30 NM · 55 km", track:"032°(T)",
+ themes:"Cotswold escarpment as handrail and lift, Gloucestershire ATZ and approach traffic, part-time Birmingham Class D, gas venting and HIRTA hazards.",
+ plot:"Draw a straight line from <strong>Nympsfield</strong> glider site (51°43'N 002°17'W, on the Cotswold edge above the Severn Vale, south of Stroud) to <strong>Bidford</strong> glider site (52°08'N 001°51'W, on the River Avon between Evesham and Stratford). Measure distance and true track; read the isogonal; note the escarpment line, Gloucestershire Airport, the hills (Cleeve, Bredon, Dumbleton), rivers, motorways, railways and every airspace volume within about 10 km.",
+ common:[["Glider","Two-seat trainer, best glide 30:1 at 50 kt; cruise 55 kt (treat IAS = TAS)"],["Elevations","Nympsfield 700 ft AMSL · Bidford 135 ft AMSL"],["Variation","About 0.5°E: the 0° and 1°E isogonals bracket the route, so magnetic ≈ true"],["Tolerances","Distance ±2 NM, track ±3°, heights ±100 ft"]],
+ versions:{
+ a:{ data:[["Wind","300°(T) / 15 kt at all heights"],["Pressure","QNH 1002 hPa everywhere (30 ft per hPa)"],["Day","Saturday, early afternoon"]],
+  qs:[
+  {t:"Plotting",q:"What is the straight-line distance from Nympsfield to Bidford?",o:["24 NM (44 km)","30 NM (55 km)","36 NM (67 km)","42 NM (78 km)"],a:1,
+   e:"About 29.9 NM = 55 km. This is a Silver-distance-length leg: handy to know what 50 km looks like on the half-million (10 cm)."},
+  {t:"Plotting",q:"What is the true track?",o:["022°(T)","032°(T)","042°(T)","052°(T)"],a:1,
+   e:"About 032°(T), i.e. north-north-east along the Cotswold edge. With variation about 0.5°E the magnetic track is also 032°(M); on this part of the chart the isogonals are close to zero."},
+  {t:"Plotting",q:"Wind 300°/15 kt, TAS 55 kt. What heading makes good 032°(T)?",o:["016°(T)","032°(T)","048°(T)","060°(T)"],a:0,
+   e:"The wind is 92° left of track: almost a pure crosswind from the left. Crosswind ≈ 15 kt; WCA = sin⁻¹(15/55) ≈ 16° into wind (left). 032 − 16 = 016°(T). A 16° crab angle is large; expect it to feel odd."},
+  {t:"Plotting",q:"Ground speed and time en route in that wind?",o:["40 kt, 45 min","54 kt, 33 min","62 kt, 29 min","70 kt, 26 min"],a:1,
+   e:"Head/tail component ≈ 15 × cos 92° ≈ 0. GS ≈ 55 × cos 16° ≈ 53–54 kt. Time ≈ 29.9 ÷ 54 × 60 ≈ 33 min. A pure crosswind still costs you a little ground speed because of the crab."},
+  {t:"Technique",q:"Which single ground feature runs almost along your whole track from Stroud through Cheltenham and Winchcombe to Evesham and Bidford, making it the natural handrail for this task?",o:["The River Severn","The A46","The M5","The Cotswold Line railway"],a:1,
+   e:"The A46 threads the route end to end just under or beside the line. The M5 only parallels you for 5 km near Cheltenham, the Severn stays 10 km left, and the Cotswold Line crosses you once near Evesham."},
+  {t:"Technique",q:"With wind from 300° the west-facing Cotswold escarpment is working as a ridge from Nympsfield towards Cheltenham. How does that help your navigation as well as your soaring?",o:["It does not; terrain is irrelevant to navigation","The scarp edge is itself a line feature lying close to your track, so following it keeps you on track while you use its lift","Ridge lift lets you ignore the wind triangle","You can fly below 500 ft along the ridge"],a:1,
+   e:"Terrain is a feature like any other. The scarp runs NNE from Nympsfield past Painswick to Birdlip and Cleeve Hill, roughly parallel to your line and just right of it. Mind the 500 ft rule and the hang-glider sites along the edge."},
+  {t:"Technique",q:"Over Cheltenham (13 NM gone) you fix yourself 1.5 NM right (east) of track, 17 NM to go. By the 1-in-60 rule, what correction regains track by Bidford?",o:["5° left","7° left","12° left","20° left"],a:2,
+   e:"Track error = 1.5 ÷ 13 × 60 ≈ 7°; closing angle = 1.5 ÷ 17 × 60 ≈ 5°. Total ≈ 12° left. Being right of track in a wind from 300° means you under-corrected for drift: your heading was too far right."},
+  {t:"Technique",q:"Bidford airfield lies on the south bank of the River Avon, with the Cotswold Line railway crossing your track a few km before it. What is the navigational use of these two features?",o:["They are backstops: cross the railway and you are nearly there; cross the Avon and you have overflown the airfield","They mark the Birmingham CTA boundary","They are of no use because they are not on the track line","They show where to set QFE"],a:0,
+   e:"A 'backstop' or limit feature beyond the destination tells you immediately if you have overshot. Pick one for every turning point, especially for an unfamiliar small grass field in a flat vale."},
+  {t:"Airspace",q:"Overhead Nympsfield the Class A base is FL155 (Cotswold CTA 5). How far must you drift before the Class A base drops to FL75?",o:["About 1.3 km to the south-east: the Cotswold CTA 3 boundary runs just beyond the airfield","About 20 km east, at Kemble","It never does on this route","Only above Gloucester"],a:0,
+   e:"The FL75 sector (Cotswold CTA 3) starts barely a kilometre south-east of the site. Nympsfield pilots live with FL75 as their effective ceiling on wave days. Check the exact line on your sheet: it is drawn in solid magenta."},
+  {t:"Airspace",q:"Gloucestershire Airport (Staverton) has no CTR, only an ATZ. Your direct line passes about 300 m outside its edge and across the final approach to Runway 26. What should you do?",o:["Nothing; you are outside the ATZ","Call Gloster Approach 128.555 before 5 NM, state your intentions, and consider offsetting the track east to stay clear of the ATZ and the approach path","Fly through the ATZ since gliders are exempt","Squawk 7000 and continue silently"],a:1,
+   e:"Gloucestershire's ATZ is 2 NM, SFC–2000 ft AAL (2101 ft ALT), and Approach handles intensive IFR training on the 26 approach, which your line crosses about 2 NM east of the threshold. A 300 m margin is not a plan: call, or re-route east of the ATZ."},
+  {t:"Airspace",q:"Gloster Approach asks aircraft below 5000 ft within its instrument approach area to call. Your track is inside that area from about Painswick to Winchcombe. What is the status of that request?",o:["A legal requirement; failure is an infringement","An advisory request, not law, but good airmanship given the IFR traffic descending through Class G","It applies only to powered aircraft","It only applies above 5000 ft"],a:1,
+   e:"The IAP area is Class G; the request in the AIP entry is advisory. But instrument approaches into Staverton descend through the altitudes where you will be thermalling, so a call on 128.555 is sensible."},
+  {t:"Airspace",q:"Over Bidford the lowest controlled airspace is Birmingham CTA 10, Class D, FL65–FL105, notified as active Mon–Thu 1700–0900 and Fri 1700–Mon 0900 local. It is Saturday afternoon. What is the base of controlled airspace over the destination?",o:["FL65, Class D, active","FL105; CTA 10 is inactive on Saturdays","There is no controlled airspace over Bidford","FL65 but Class G"],a:0,
+   e:"Weekends fall inside the notified hours, so on Saturday CTA 10 is live Class D from FL65. Weekday daytime it reverts to Class G and the next base is FL105 Class A. Part-time airspace is a favourite exam trap: always read the hours box."},
+  {t:"Airspace",q:"About 1 NM right of track near Wormington (43 km) the chart shows a gas venting site, SFC–2600 ft ALT. What does it mean for you?",o:["It is a HIRTA; your radio may fail","Gas is vented from a storage facility; the area should be avoided below 2600 ft because of the explosion and ignition hazard","It is a parachute drop zone","It is a lit obstruction"],a:1,
+   e:"Gas venting stations (GVS) are shown in ENR 5.3 and on the chart; avoid the cylinder, especially low. It sits well under your final-glide path, so plan to pass west of it."},
+  {t:"Radio & rules",q:"Which LARS unit covers the whole Nympsfield–Bidford route?",o:["Gloster Radar 120.980","Brize Norton LARS 124.280 (within 40 NM of Brize)","Birmingham Radar 123.980","Bristol Radar 125.650"],a:1,
+   e:"Brize LARS covers 40 NM from Brize Norton and both sites lie inside that circle. Gloster Approach is the practical unit near Staverton and Birmingham Radar controls CTA 10, but neither is a LARS unit for the route."},
+  {t:"Radio & rules",q:"A hang-glider symbol at Cravens Gorse (near Winchcombe, 9 km right of track) is annotated 2 NM, SFC–1000 ft AGL. What should you do when passing?",o:["Avoid flying within 2 NM below 1000 ft AGL; expect hang gliders and paragliders on the slope and in thermals above it","Nothing; the site has a tow rope hazard only","Call the site on 129.980","It is a glider winch site; stay above 3000 ft"],a:0,
+   e:"The notified area protects winch and hill launching. Unlisted paragliding sites also exist all along the escarpment (Frocester, Selsley, Cleeve, Bredon), which you as a former paraglider pilot will spot before anyone else."},
+  {t:"Altimetry",q:"What is the transition altitude at Gloucestershire, and what is it once you are under the Birmingham CTA near Bidford?",o:["3000 ft at both","6000 ft at both","3000 ft at Gloucestershire; 6000 ft beneath the Birmingham CTA","4000 ft at both"],a:2,
+   e:"Gloucestershire uses the standard 3000 ft TA. Wellesbourne and Birmingham use 6000 ft because of the Birmingham CTA. Below the TA you fly on QNH, above it on 1013 unless ATC says otherwise."},
+  {t:"Altimetry",q:"QNH is 1002 hPa. If Birmingham CTA 10 is active (base FL65), at what altitude is the base over Bidford?",o:["6500 ft","6830 ft","6170 ft","5900 ft"],a:2,
+   e:"1013 − 1002 = 11 hPa × 30 ft = 330 ft. FL65 = 6500 − 330 = 6170 ft altitude. On low-pressure days the Class D above Bidford is 300 ft nearer than the chart figure."},
+  {t:"Glide",q:"Still air. Over Dumbleton Hill, 7.5 NM from Bidford (135 ft). What altitude (QNH) do you need to arrive 1000 ft above the airfield?",o:["1500 ft","2150 ft","2650 ft","3200 ft"],a:2,
+   e:"7.5 × 203 ≈ 1520 ft lost. Arrival altitude = 135 + 1000 = 1135 ft. Required ≈ 2650 ft QNH. Dumbleton Hill (on track) is a good place for this check because it is unmistakable."},
+  {t:"Glide",q:"Today's wind is a 15 kt crosswind with no head or tail component. Does it affect your final glide?",o:["No, only headwind and tailwind matter","Yes, slightly: you must crab, so speed along track = √(50² − 15²) ≈ 48 kt and the effective glide drops to about 28:1","Yes, a crosswind halves the glide ratio","Yes, a crosswind improves the glide"],a:1,
+   e:"Crabbing uses some of your airspeed to cancel drift, so ground progress along track falls to about 48 kt and the effective ratio to ~28:1 (6% worse). Small, but on a marginal final glide it is 150 ft."},
+  {t:"Glide",q:"Abeam Evesham with 5 NM to run, still air. What altitude (QNH) gives a 1000 ft arrival over Bidford?",o:["1500 ft","2150 ft","2650 ft","3100 ft"],a:1,
+   e:"5 × 203 ≈ 1015 ft; plus 1135 ft arrival ≈ 2150 ft QNH. Note Evesham is 3 km left of track, so 'abeam' means a quick cross-check that you are not drifting towards Long Lartin and Pershore."}
+  ]},
+ b:{ data:[["Wind","040°(T) / 20 kt at all heights"],["Pressure","QNH 1026 hPa everywhere (30 ft per hPa)"],["Day","Friday, 1500 local"]],
+  qs:[
+  {t:"Plotting",q:"True track is 032°. Variation here is about 0.5°E. What magnetic track do you write on your plog?",o:["032°(M), the correction is below the precision of your compass","033°(M)","031°(M)","037°(M)"],a:0,
+   e:"Half a degree east is lost in compass reading error. The lesson is that on this part of the chart true and magnetic are effectively the same; further east in Cambridgeshire variation is about 1°E and in the far west it is west."},
+  {t:"Plotting",q:"Wind 040°/20 kt, TAS 55 kt. What heading makes good 032°(T)?",o:["024°(T)","035°(T)","045°(T)","052°(T)"],a:1,
+   e:"Wind is only 8° right of the nose: crosswind = 20 × sin 8° ≈ 3 kt; WCA ≈ 3° into wind (right). Heading ≈ 035°(T). Nearly all of this wind is headwind."},
+  {t:"Plotting",q:"What ground speed results?",o:["75 kt","55 kt","45 kt","35 kt"],a:3,
+   e:"Headwind component = 20 × cos 8° ≈ 20 kt. GS ≈ 55 − 20 = 35 kt. You cover barely 0.6 NM a minute; this is a slow task."},
+  {t:"Plotting",q:"Time en route at 35 kt, ignoring thermalling?",o:["33 min","42 min","51 min","62 min"],a:2,
+   e:"29.9 ÷ 35 × 60 ≈ 51 min. Compare 33 min in version A's crosswind: the same leg takes half as long again into a 20 kt headwind."},
+  {t:"Technique",q:"A checkpoint fails to appear at its ETA. What is the first thing to check before changing heading?",o:["Your ground speed and timing: into a 20 kt headwind the checkpoint is still ahead of you","The variation setting","Your radio frequency","Whether the chart is current"],a:0,
+   e:"Most 'lost' moments are timing errors, not heading errors. Confirm elapsed time and GS first; a 5 kt stronger headwind delays a 10 NM checkpoint by over 2 minutes. Only then look for a cross-track error."},
+  {t:"Technique",q:"Cheltenham is a large town 1 km right of your line. Why is the town centre a poor checkpoint, and what would you use instead?",o:["A town centre is a 3 km blur with no precise point; use a sharp edge feature such as the racecourse or the M5 junction 11 beside your track","Towns are never shown on the chart","Towns cannot be seen from above 2000 ft","Use the cathedral spire"],a:0,
+   e:"Big towns are good for orientation, bad for position. Choose a hard-edged feature on or beside the line: Cheltenham racecourse (0.3 km right of track), the M5/A40 junction, or the railway crossing at Cheltenham Spa."},
+  {t:"Technique",q:"The Bristol–Birmingham main line crosses your track at Cheltenham and then diverges slowly left towards Ashchurch and Worcester. Why is a feature that diverges at a shallow angle dangerous as a handrail?",o:["Railways are not shown on the half-million chart","Because it looks parallel; following it leads you gently off track without any obvious cue","Because trains disturb the air","Because railways always mark airspace boundaries"],a:1,
+   e:"A 10° divergence puts you 1 NM off after 6 NM with nothing to alert you. Use diverging features for orientation only; handrail on features that truly parallel the track (here, the A46) and check them against a second feature."},
+  {t:"Technique",q:"After 20 NM you are 2 NM left (west) of track, over the Severn side of the M5, with 10 NM to run. What heading change regains track by Bidford?",o:["6° right","12° right","18° right","24° right"],a:2,
+   e:"Track error 2 ÷ 20 × 60 = 6°; closing angle 2 ÷ 10 × 60 = 12°; total 18° right. Note the left-of-track error in a wind from 040° is unexpected: suspect your heading, not the forecast."},
+  {t:"Airspace",q:"Aston Down glider site (Cotswold GC) lies 9 km right of track early in the task, annotated SFC–3000 ft AGL (site elevation 600 ft). What hazard does that annotation describe?",o:["A Class D zone","Winch cables and launching to about 3600 ft AMSL; keep clear of the launch line and above the notified height if crossing","A parachute drop zone","A prohibited area"],a:1,
+   e:"The glider-site symbol with a height tells you how high cables and launching aircraft reach. 3000 ft AGL on a 600 ft site is 3600 ft AMSL. You will not cross it on the direct line, but a diversion east to avoid Staverton could."},
+  {t:"Airspace",q:"From Painswick to Evesham no Cotswold or Birmingham sector overlies you; the Class A above is the Daventry CTA. What base should you expect, and how should you treat it in the exam room?",o:["FL55","FL105, but read it off the chart: the exam marks what the sheet shows, not what you remember","FL195","There is no Class A there"],a:1,
+   e:"Current sources put the Daventry CTA base over Cheltenham–Evesham at FL105. The point of the question is procedural: for any base figure, read the value printed inside the sector on your chart rather than relying on memory."},
+  {t:"Airspace",q:"Birmingham CTA 10 (FL65–FL105) is notified active Mon–Thu 1700–0900 and Fri 1700–Mon 0900 local. It is Friday at 1500. What is its status over Bidford?",o:["Class D, active","Class G: outside notified hours it is not controlled airspace","Class A","Class C"],a:1,
+   e:"Friday 1500 is outside the notified hours, so the volume is Class G and the next base above is FL105 Class A. The same flight two hours later would be under active Class D from FL65. Note the hours box on the chart margin."},
+  {t:"Airspace",q:"Gloucestershire's ATZ is active during Approach hours, which on weekdays are 0830–1930 local. Outside those hours, what applies?",o:["The ATZ ceases; make blind calls on 128.555 and look out for non-radio traffic","The ATZ becomes Class D","The MATZ takes over","Entry is prohibited"],a:0,
+   e:"An ATZ exists only during the notified hours of the air traffic unit. Outside them the circle on the chart has no legal force, but the aerodrome may still be in use: blind calls and a good lookout."},
+  {t:"Airspace",q:"EG R105 Highgrove House (SFC–860 ft ALT) lies 12 km south-east of Nympsfield. What is a Restricted Area, and does it affect your planned flight?",o:["Airspace within which flight is restricted according to published conditions; it is not on your line and far below your cruising altitudes, but a low final approach over it would be an infringement","A Class A area","A military firing range","An area you may enter freely by day"],a:0,
+   e:"R-areas are defined in ENR 5.1 with their own conditions (here, protection of a private residence). Local clubs hold letters of agreement for it. It is a non-factor for this task but a trap for a low return towards Nympsfield from the south-east."},
+  {t:"Radio & rules",q:"Birmingham Radar (123.980) controls CTA 10 when active. What is the sensible practice when flying beneath an active Birmingham CTA without wanting a service?",o:["Nothing; switch the radio off","Select the Birmingham listening squawk / monitor the frequency so the controller can call you if you climb towards the base","Call every five minutes","Squawk 7700"],a:1,
+   e:"Monitoring the controlling frequency (and using a published listening squawk if you carry a transponder) is the cheap insurance against an inadvertent climb into the base in a strong thermal."},
+  {t:"Radio & rules",q:"A HIRTA (SFC–700 ft) is shown at Pershore, 11 km left of track. What is a HIRTA and why does it matter even if you stay above its upper limit?",o:["High Intensity Radio Transmission Area: radiation from the radar can interfere with avionics; avoid the cylinder and expect interference nearby","A helicopter training area","A hang-gliding site","A hot-air balloon launch site"],a:0,
+   e:"HIRTAs mark powerful transmitters (the Pershore radar). Within the notified cylinder your radio, vario electronics and GPS may misbehave. It is off your line but on the Severn side you would drift to in a westerly."},
+  {t:"Altimetry",q:"QNH is 1026 hPa. At what altitude is FL65 today?",o:["6500 ft","6110 ft","6890 ft","7280 ft"],a:2,
+   e:"1026 − 1013 = 13 hPa × 30 ft = 390 ft. FL65 = 6500 + 390 = 6890 ft altitude. High pressure lifts flight levels, so the Class D base over Bidford (when active) is 390 ft higher than the chart figure."},
+  {t:"Altimetry",q:"Both sites lie in the Cotswold Altimeter Setting Region. Why would you prefer the Gloucestershire QNH to the Cotswold RPS when passing Staverton and judging the 2101 ft ALT ATZ ceiling?",o:["Because the RPS is the lowest forecast QNH for the region, so it makes you read lower than you are: safe for terrain, but it can put you inside an altitude-based ceiling you think you are above","Because RPS is only for IFR flights","Because the RPS is given in inches","Because the RPS changes every minute"],a:0,
+   e:"RPS is conservative for terrain clearance and anti-conservative for altitude-based airspace limits. Near an airfield with an altitude-defined ceiling or base, use that airfield's QNH."},
+  {t:"Glide",q:"With a 20 kt headwind on the final glide flown at 50 kt, how much height do you lose per nautical mile?",o:["200 ft","240 ft","340 ft","400 ft"],a:2,
+   e:"GS = 50 − 20 = 30 kt; effective glide = 30 × 30/50 = 18:1. 6076 ÷ 18 ≈ 340 ft per NM: two-thirds worse than still air."},
+  {t:"Glide",q:"Over Dumbleton Hill, 7.5 NM to run into that headwind. What altitude (QNH) do you need to arrive 1000 ft above Bidford (135 ft)?",o:["2650 ft","3100 ft","3650 ft","4200 ft"],a:2,
+   e:"7.5 × 340 ≈ 2520 ft lost; plus 1135 ft arrival ≈ 3650 ft QNH. In still air the same glide needed 2650 ft: the 20 kt headwind costs 1000 ft."},
+  {t:"Glide",q:"What speed should you fly on that final glide into a 20 kt headwind?",o:["About 50 kt, best glide","About 60 kt: best glide plus roughly half the headwind","About 40 kt, minimum sink","Never-exceed speed"],a:1,
+   e:"Into wind the optimum speed rises; a rule of thumb is Vbg plus half the headwind component, about 60 kt here. Flying 50 kt would lower the effective ratio further and lengthen your exposure to the wind."}
+  ]}
+ }
+});
+
+/* ===================== EXAM 3 : Lasham -> Parham ===================== */
+EXAMS.push({
+ id:"3", from:"Lasham", to:"Parham", dist:"26 NM · 49 km", track:"127°(T)",
+ themes:"Odiham MATZ, Farnborough Class D steps and the TMZ, D130 Longmoor on the line, the South Downs scarp as handrail and backstop.",
+ plot:"Draw a straight line from <strong>Lasham</strong> glider site (51°11'N 001°02'W) to <strong>Parham</strong> glider site (50°56'N 000°28'W, north of the Downs between Pulborough and Storrington). Measure distance and true track; read the isogonal; note Alton, Bordon and Longmoor, the Oakhanger dishes, Blackdown, Midhurst, Petworth, the Rother and Arun, and the Farnborough CTA sector boundaries and bases along the first half.",
+ common:[["Glider","Two-seat trainer, best glide 30:1 at 50 kt; cruise 55 kt (treat IAS = TAS)"],["Elevations","Lasham 618 ft AMSL · Parham 110 ft AMSL"],["Variation","1°E"],["Tolerances","Distance ±2 NM, track ±3°, heights ±100 ft"]],
+ versions:{
+ a:{ data:[["Wind","200°(T) / 15 kt at all heights"],["Pressure","QNH 1008 hPa everywhere (30 ft per hPa)"],["Day","Saturday, 1400 local; Farnborough and Odiham open"]],
+  qs:[
+  {t:"Plotting",q:"What is the straight-line distance from Lasham to Parham?",o:["21 NM (39 km)","26 NM (49 km)","31 NM (57 km)","36 NM (67 km)"],a:1,
+   e:"About 26.3 NM = 48.7 km. Just under Silver distance, which is why Parham is a popular Lasham out-and-return turning point rather than a Silver goal."},
+  {t:"Plotting",q:"What is the true track?",o:["117°(T)","127°(T)","137°(T)","147°(T)"],a:1,
+   e:"About 127°(T), east-south-east, converging slowly with the Downs scarp. Variation 1°E gives 126°(M)."},
+  {t:"Plotting",q:"Wind 200°/15 kt, TAS 55 kt. What heading makes good 127°(T)?",o:["112°(T)","127°(T)","142°(T)","157°(T)"],a:2,
+   e:"Wind is 73° right of track: crosswind = 15 × sin 73° ≈ 14 kt; WCA = sin⁻¹(14/55) ≈ 15° into wind (right). 127 + 15 = 142°(T), 141°(M)."},
+  {t:"Plotting",q:"Ground speed and time en route?",o:["49 kt, 32 min","55 kt, 29 min","41 kt, 38 min","62 kt, 25 min"],a:0,
+   e:"Headwind component = 15 × cos 73° ≈ 4 kt. GS ≈ 55 × cos 15° − 4 ≈ 53 − 4 = 49 kt. Time = 26.3 ÷ 49 × 60 ≈ 32 min."},
+  {t:"Technique",q:"Leaving Lasham, Farnborough CTA 6 (base 2500 ft) and the Oakhanger HIRTA start about 8 km down track. What is your first navigational priority after setting course?",o:["Set 1013 on the altimeter","A positive early fix on Alton (1 km right of track, A31 and railway terminus) to confirm heading and that you are passing south of the Odiham ATZ","Call Parham Radio","Climb as high as possible"],a:1,
+   e:"Alton is a sharp, early checkpoint. Confirming you are on track there proves you will pass the Odiham ATZ (4 km left) and tells you exactly when the 2500 ft base begins. Errors are cheapest to fix in the first 5 NM."},
+  {t:"Technique",q:"The South Downs scarp runs WNW–ESE on your right, converging with your track until it passes 2 km south of Parham. Why is a converging feature useful?",o:["It is not; features must cross the track to be useful","It funnels you towards the destination: keeping it on your right at a decreasing distance confirms both track and progress","It marks the Farnborough CTA boundary","Converging features always indicate wind direction"],a:1,
+   e:"A long, unmistakable feature that converges on the destination is the best kind of handrail: the gap between you and the ridge closes steadily, and the Arun gap at Amberley gives you a fix along it."},
+  {t:"Technique",q:"Over Petworth House (20 NM gone) you fix yourself 1 NM left (north) of track with 6 NM to go. What correction regains track by Parham?",o:["3° right","10° right","13° right","20° right"],a:2,
+   e:"Track error = 1 ÷ 20 × 60 = 3°; closing angle = 1 ÷ 6 × 60 = 10°; total 13° right. The wind from 200° would push you left if you under-corrected, so this is the expected direction of error."},
+  {t:"Technique",q:"Which feature tells you unmistakably that you have overshot Parham?",o:["The River Arun","Reaching the Downs scarp itself: the ridge rises 2 km south of the airfield, so if you are over the scarp Parham is behind you","The A272","Pulborough station"],a:1,
+   e:"The ridge is the backstop to the south; the A283 and Arun Valley railway bound the field to the north and west. Parham is a small field in trees: know your backstops before you need them."},
+  {t:"Airspace",q:"Lasham lies inside the Odiham MATZ (5 NM, SFC–3405 ft ALT) and under the London TMA. What is the base of controlled airspace directly over Lasham?",o:["2500 ft (Farnborough CTA 6)","3405 ft (MATZ ceiling)","5500 ft ALT, London TMA Class A","FL75"],a:2,
+   e:"The TMA base over Lasham is 5500 ft ALT. The MATZ is not controlled airspace and the Farnborough CTA sectors begin a few km south-east of the site. Lasham's winch cables reach 3600 ft QNH, so arriving traffic keeps above and clear."},
+  {t:"Airspace",q:"Between Alton and Bordon you are under Farnborough CTA 6, Class D, base 2500 ft ALT. Without a clearance, what is your practical ceiling there?",o:["2500 ft on QNH, so you cruise at 2300 ft or lower to keep a margin","3500 ft","FL45","Unlimited, gliders are exempt from Class D"],a:0,
+   e:"The base is an altitude, so fly QNH and stay a few hundred feet below 2500 ft. Farnborough will often give a crossing clearance on 133.440, but a thermal at 2000 ft is not the moment to start negotiating."},
+  {t:"Airspace",q:"EG D130 Longmoor (SFC–1800 ft ALT, H24, occasionally 2300 ft by NOTAM) lies directly on your line about 17 km out. How do you plan to cross it?",o:["Fly through below 1800 ft; D-areas are advisory","Cross above its upper limit (above 1800 ft, or 2300 ft if NOTAM'd), which with the 2500 ft CTA base leaves a narrow vertical window; otherwise route around it","Call Odiham for permission","Danger areas never apply at weekends"],a:1,
+   e:"Together the D130 ceiling and the CTA 5 base leave a 700 ft slot (1800–2500 ft). Many Lasham pilots simply route west of Longmoor. Check the NOTAM for the 2300 ft extension; Farnborough Radar on 133.440 gives the activity status when open."},
+  {t:"Airspace",q:"The Oakhanger HIRTA (1.5 NM, SFC–3800 ft ALT) is also on your line. What does the HIRTA warn you of?",o:["Military parachuting","High-intensity radio transmissions from the satellite ground station that can disrupt avionics, including your radio, vario electronics and GPS","A danger area with live firing","A gliding site"],a:1,
+   e:"Oakhanger's dishes are a landmark as well as a hazard. Expect electronic interference inside the cylinder; the direct line clips it, so an offset to the north-east adds little distance."},
+  {t:"Airspace",q:"Farnborough CTA 8 (4500–5500 ft) is Class E and a Transponder Mandatory Zone. Can a glider without a transponder climb into it?",o:["Yes; Class E needs no clearance for VFR and gliders are exempt from TMZs","Yes, if squawking 7000","Not without prior permission from Farnborough: VFR in Class E needs no clearance, but the TMZ requires a Mode S transponder or an agreed exemption","No, Class E is IFR only"],a:2,
+   e:"Class E is the least restrictive controlled airspace (no VFR clearance) but the TMZ rule is separate: carry Mode S or obtain permission before entry. On this track CTA 8 overlies you only briefly near Alton."},
+  {t:"Radio & rules",q:"You want a Basic Service and the status of D130 while passing Alton–Liphook. Which frequency?",o:["Lasham Radio 131.030","Farnborough LARS West 125.250 (crossing requests go to Farnborough Radar 133.440)","Odiham Tower 131.305","Solent Radar 120.230"],a:1,
+   e:"Farnborough LARS West covers this area and is the danger-area activity information service for Longmoor. Transit or crossing requests into Farnborough Class D go to 133.440. When Farnborough is closed, London Information 124.600."},
+  {t:"Radio & rules",q:"What does Parham ask of arriving gliders?",o:["Call Parham Radio 124.965 before arrival and do not overfly the site below 2000 ft AGL because of winch launching","Join overhead at 1000 ft","No radio call is required; Parham has no frequency","Land only on runway 22"],a:0,
+   e:"Winch cables go to 2000 ft AGL (about 2100 ft AMSL). Call on 124.965, listen to the launch calls and join clear of the launch line. Circuit direction depends on runway: 22 right-hand, 04 left-hand."},
+  {t:"Altimetry",q:"Both sites lie beneath the London TMA. Which QNH should you use, and why not the Regional Pressure Setting?",o:["The RPS; it is always the safest","An adjacent aerodrome QNH (Farnborough, later Shoreham or Goodwood): within and beneath TMAs and CTAs the RPS system does not apply, and the airspace bases are altitudes","1013 hPa, because the TMA is above the transition altitude","Lasham QFE for the whole flight"],a:1,
+   e:"The AIP excludes airspace within and beneath TMAs/CTAs from the RPS system. Use a nearby aerodrome QNH so that your altimeter matches the 2500 ft, 4500 ft and 5500 ft bases exactly."},
+  {t:"Altimetry",q:"You left Lasham QFE set (elevation 618 ft). At what indicated height is the 2500 ft ALT base of Farnborough CTA 6?",o:["2500 ft","3118 ft","1882 ft","2118 ft"],a:2,
+   e:"QFE height = altitude − 618 ft, so 2500 − 618 = 1882 ft indicated. Mental arithmetic like this near a 2500 ft base is why you switch to QNH before leaving the local area."},
+  {t:"Glide",q:"Over Petworth (6.5 NM to run). Still air, arrival 1000 ft above Parham (110 ft). Altitude needed on QNH?",o:["1900 ft","2430 ft","2900 ft","3300 ft"],a:1,
+   e:"6.5 × 203 ≈ 1320 ft lost; plus 110 + 1000 = 1110 ft arrival = ~2430 ft QNH."},
+  {t:"Glide",q:"Today's final glide has a 4 kt headwind component. How much does that change the Petworth figure?",o:["Not at all","About 120 ft more (effective glide ≈ 27:1, ~222 ft/NM)","About 600 ft more","It halves the required height"],a:1,
+   e:"GS 46 kt, effective 30 × 46/50 ≈ 27.6:1 ≈ 220 ft/NM. 6.5 NM costs 1430 ft instead of 1320 ft: about 120 ft. Small winds matter little; 15 kt winds matter a lot."},
+  {t:"Glide",q:"Over the Midhurst mast (10 NM to run) at 3500 ft QNH, still air. Roughly how high will you arrive over Parham?",o:["About 1350 ft above the airfield","About 2000 ft above the airfield","About 500 ft above the airfield","You will not reach the airfield"],a:0,
+   e:"10 × 203 ≈ 2030 ft lost. 3500 − 2030 = 1470 ft AMSL; minus 110 ft ≈ 1360 ft above the airfield. Comfortable, and still under the 5500 ft TMA all the way."}
+  ]},
+ b:{ data:[["Wind","090°(T) / 20 kt at all heights"],["Pressure","QNH 990 hPa everywhere (30 ft per hPa)"],["Day","Sunday, 1500 local; Farnborough open, Odiham ATC closed"]],
+  qs:[
+  {t:"Plotting",q:"True track 127°, variation 1°E. Magnetic track?",o:["128°(M)","126°(M)","127°(M)","117°(M)"],a:1,
+   e:"Variation east, magnetic least: 127 − 1 = 126°(M). Add the wind correction afterwards to get a magnetic heading."},
+  {t:"Plotting",q:"Wind 090°/20 kt, TAS 55 kt. What true heading makes good 127°(T)?",o:["114°(T)","127°(T)","140°(T)","152°(T)"],a:0,
+   e:"Wind is 37° left of track: crosswind = 20 × sin 37° ≈ 12 kt; WCA = sin⁻¹(12/55) ≈ 13° into wind (left). 127 − 13 = 114°(T), 113°(M)."},
+  {t:"Plotting",q:"What ground speed results?",o:["55 kt","47 kt","38 kt","30 kt"],a:2,
+   e:"Headwind component = 20 × cos 37° ≈ 16 kt. GS ≈ 55 × cos 13° − 16 ≈ 54 − 16 = 38 kt."},
+  {t:"Plotting",q:"Time en route at 38 kt, and how long for each 5 NM leg between checkpoints?",o:["42 min; about 8 min per 5 NM","32 min; about 6 min per 5 NM","52 min; about 10 min per 5 NM","29 min; about 5 min per 5 NM"],a:0,
+   e:"26.3 ÷ 38 × 60 ≈ 42 min. 5 NM ÷ 38 kt ≈ 7.9 min. Writing the leg times on the plog turns your watch into a navigation instrument."},
+  {t:"Technique",q:"With wind from 090° and no drift correction, which way do you drift and which hazards does that side hold?",o:["Right (south-west), towards Longmoor, Butser and the Harting hang-gliding sites, and eventually the Solent CTA","Left (north-east), towards the Farnborough CTR","No drift; it is a headwind","Left, towards Gatwick"],a:0,
+   e:"Wind from the left-front pushes you right. The south side of this route has D130, the Downs paragliding sites and, 11 km off, the Solent Class D. Knowing which side is 'hot' shapes which way you offset when in doubt."},
+  {t:"Technique",q:"Passing the Midhurst mast (16 NM gone) you are 1.5 NM right (south) of track, 10 NM to go. What correction regains track by Parham?",o:["6° left","9° left","15° left","24° left"],a:2,
+   e:"Track error 1.5 ÷ 16 × 60 ≈ 6°; closing angle 1.5 ÷ 10 × 60 = 9°; total ≈ 15° left. Matches the expected drift direction for a wind from 090°."},
+  {t:"Technique",q:"The River Rother runs west–east through Midhurst and Petworth, roughly 5 km to the right of your line for 15 km. How does a parallel feature at a known offset help?",o:["It does not; features must be on the line","It gives a continuous estimate of cross-track error: if the river appears closer than 5 km you have drifted right","It shows wind direction","It marks the TMA base"],a:1,
+   e:"Judging distance to a parallel feature from height is a skill: at 3000 ft, a feature 5 km away sits about 30° below the horizon. Practice it on local flights so the estimate is available when it matters."},
+  {t:"Technique",q:"Why plan the Arun/Rother confluence at Stopham and Pulborough as your last fix rather than the airfield itself?",o:["Because Parham is a small grass field hidden among trees that is hard to see until close; a sharp fix 3 NM short lets you set up the arrival with certainty","Because the river marks the TMA base","Because Pulborough has an ATZ","Because you must report there"],a:0,
+   e:"Small gliding sites are notoriously invisible. Fix on the unmistakable river junction, railway and A29/A283 crossing at Pulborough; Parham is then 3 NM on a known bearing."},
+  {t:"Airspace",q:"Farnborough CTA 8 (Class E TMZ, 4500 ft) and CTA 6 (Class D, 2500 ft) start a few km south-east of Lasham. What is the lowest controlled airspace over the airfield itself?",o:["Farnborough CTA 6 at 2500 ft","London TMA at 5500 ft ALT","Odiham MATZ at 3405 ft","Farnborough CTA 8 at 4500 ft"],a:1,
+   e:"The TMA at 5500 ft ALT is the ceiling over Lasham. The CTA sectors begin ~5 km down your track (CTA 8 from ~5 km, CTA 6 from ~8 km), so the 2500 ft base arrives before Alton."},
+  {t:"Airspace",q:"What is the lowest controlled airspace within 10 km of Parham, and on which side?",o:["Gatwick CTA, Class D, base 1500 ft, about 10 km to the north","Solent CTA, base 2000 ft, to the south","Shoreham CTR, SFC, to the east","None within 10 km"],a:0,
+   e:"The Gatwick CTA southern edge (1500–2500 ft Class D, LTMA above) runs about 10 km north of Parham. Southdown GC pilots soar south of the field to stay clear of it. Shoreham and Goodwood have ATZs only."},
+  {t:"Airspace",q:"What does a glider need to enter Class D airspace such as Farnborough CTA 6?",o:["A transponder only","An ATC clearance and two-way radio; a transponder only where it is also a TMZ","Nothing; Class D is open to VFR","A filed flight plan"],a:1,
+   e:"Clearance plus continuous two-way radio with Farnborough. Gliders do get crossing clearances, but plan to stay below the base: a clearance can be refused or withdrawn."},
+  {t:"Airspace",q:"Odiham MATZ: 5 NM radius, SFC–3405 ft ALT, with a stub extending 5 NM on the 093°(T) side from 1405 to 3405 ft. Odiham ATC is closed this Sunday. What is the status of the MATZ and the ATZ?",o:["Both cease outside ATC hours","The MATZ is inactive outside notified hours, but the ATZ (2 NM, SFC–2405 ft) remains active and Farnborough may provide the service","Both remain active and mandatory","Only the stub remains active"],a:1,
+   e:"Per the AIP the Odiham ATZ stays active outside ATS hours (Farnborough 125.250 may act for it at weekends), while the MATZ applies during notified hours. Your line passes 4 km from the ATZ, so stay on track."},
+  {t:"Airspace",q:"Odiham also hosts the Kestrel GC glider site (launches to 2500 ft AGL) and the AIP warns of intense glider activity up to 4000 ft AMSL around Lasham and Odiham. For an exam, what does a glider-site symbol with a height figure tell other pilots to do?",o:["Avoid the site by at least 10 NM","Expect cables and gliders up to the stated height; avoid overflying below it and keep a sharp lookout","Call the site before passing","Nothing; it is informational only"],a:1,
+   e:"The symbol and height are a conflict warning for everyone, powered and gliding. Your own airfield's symbol tells visiting power pilots the same about Lasham's 3000 ft AGL cables."},
+  {t:"Radio & rules",q:"Farnborough's TMZ sectors (CTA 8 and 9) require what of a glider wishing to enter?",o:["Nothing; TMZs do not apply to gliders","A Mode S transponder, or permission from Farnborough before entry (for example by requesting a Basic Service on 125.250)","A Mode A/C transponder only","A flight plan"],a:1,
+   e:"TMZ = transponder mandatory, unless the controlling unit agrees otherwise beforehand. Non-transponder gliders can ask Farnborough; without an answer the TMZ is closed to you."},
+  {t:"Radio & rules",q:"Farnborough is closed, and you want the current activity status of D130 Longmoor. Which service?",o:["London Information 124.600 (the notified alternative DAAIS for D130)","Odiham Approach","Lasham Radio","Shoreham Approach"],a:0,
+   e:"The AIP names Farnborough Radar as the danger-area activity information service for D130 with London Information 124.600 as the alternative when Farnborough is closed. Longmoor is notified H24, so assume active unless told otherwise."},
+  {t:"Altimetry",q:"QNH is 990 hPa. The Class A above Farnborough CTA 9 starts at FL65. At what altitude is FL65 today?",o:["6500 ft","6190 ft","5810 ft","7190 ft"],a:2,
+   e:"1013 − 990 = 23 hPa × 30 ft = 690 ft. FL65 = 6500 − 690 = 5810 ft altitude. On a deep low the flight-level Class A sits lower than the altitude-based TMA next door (5500 ft): read both carefully."},
+  {t:"Altimetry",q:"You still have Lasham QFE (618 ft) set when approaching D130, whose upper limit is 1800 ft ALT. At what indicated height is the top of the danger area?",o:["1800 ft","2418 ft","1182 ft","1200 ft"],a:2,
+   e:"1800 − 618 = 1182 ft indicated on Lasham QFE. The simplest fix is to set QNH before leaving the local area, so that the altitudes printed on the chart are the numbers you read."},
+  {t:"Glide",q:"With a 16 kt headwind on the final glide flown at 50 kt, how much height do you lose per nautical mile?",o:["200 ft","240 ft","300 ft","400 ft"],a:2,
+   e:"GS = 50 − 16 = 34 kt; effective glide = 30 × 34/50 ≈ 20:1; 6076 ÷ 20 ≈ 300 ft per NM."},
+  {t:"Glide",q:"Over Petworth, 6.5 NM to run into that wind. Altitude (QNH) needed to arrive 1000 ft above Parham (110 ft)?",o:["2430 ft","2800 ft","3050 ft","3500 ft"],a:2,
+   e:"6.5 × 300 ≈ 1950 ft lost; plus 1110 ft arrival ≈ 3050 ft QNH. In still air it was 2430 ft: the wind costs 600 ft."},
+  {t:"Glide",q:"Over Pulborough (2.5 NM to run) at 1500 ft QNH into the same wind. What is the arrival height over Parham, and what do you conclude?",o:["About 650 ft above the airfield: too low for a normal circuit, so decide now between a straight-in approach and a field","About 1200 ft, a normal arrival","About 300 ft, you will not make it","Exactly 1000 ft"],a:0,
+   e:"2.5 × 300 ≈ 750 ft lost. 1500 − 750 = 750 ft AMSL, minus 110 ft ≈ 640 ft above the field with winch cables ahead. Make the decision at Pulborough, not over the trees."}
+  ]}
+ }
+});
+
+/* ===================== APP ===================== */
+const $ = id => document.getElementById(id);
+const PASS = 75;
+let current = null; // {exam, ver}
+
+function bestKey(ex, v){ return `splnav-best-${ex.id}${v}`; }
+function getBest(ex, v){ try{ return localStorage.getItem(bestKey(ex,v)); }catch(e){ return null; } }
+function setBest(ex, v, score){ try{ const prev=+getBest(ex,v)||0; if(score>prev) localStorage.setItem(bestKey(ex,v), String(score)); }catch(e){} }
+
+function renderHome(){
+  const cards = $('cards'); cards.innerHTML = '';
+  EXAMS.forEach(ex => {
+    const card = document.createElement('div'); card.className = 'card';
+    const bests = ['a','b'].map(v => { const b = getBest(ex,v); return b ? `${v.toUpperCase()}: best ${b}/20` : `${v.toUpperCase()}: not attempted`; }).join(' · ');
+    card.innerHTML = `
+      <div class="eyebrow">Exam ${ex.id}</div>
+      <div class="route">${ex.from} &rarr; ${ex.to}</div>
+      <div class="meta">${ex.dist} · ${ex.track}</div>
+      <div class="themes">${ex.themes}</div>
+      <div class="versions">
+        <button type="button" data-ex="${ex.id}" data-v="a">Version A</button>
+        <button type="button" class="ghost" data-ex="${ex.id}" data-v="b">Version B</button>
+      </div>
+      <div class="best">${bests}</div>`;
+    cards.appendChild(card);
+  });
+}
+
+function openPaper(exId, v){
+  const ex = EXAMS.find(e => e.id === exId); const ver = ex.versions[v];
+  current = {ex, v};
+  $('paperLabel').textContent = `Exam ${ex.id} · Version ${v.toUpperCase()} · 20 questions`;
+  $('paperTitle').textContent = `${ex.from} to ${ex.to}`;
+  const rows = [...ex.common, ...ver.data].map(([k,val]) => `<dt>${k}</dt><dd>${val}</dd>`).join('');
+  $('brief').innerHTML = `<h3>Step 1 — Plot the task</h3><p>${ex.plot}</p><h3>Step 2 — Planning data for this paper</h3><dl>${rows}</dl>`;
+  const qs = $('questions'); qs.innerHTML = '';
+  ver.qs.forEach((q,i) => {
+    const n = i+1, id = `q${n}`;
+    const art = document.createElement('article'); art.className = 'q'; art.dataset.a = q.a; art.id = id;
+    art.innerHTML = `<header><span class="n">${n}.</span><span class="stem">${q.q}</span><span class="tag">${q.t}</span></header>
+      <ul class="opts">${q.o.map((o,k)=>`<li><label><input type="radio" name="${id}" id="${id}o${k}" value="${k}"><span>${String.fromCharCode(65+k)}. ${o}</span></label></li>`).join('')}</ul>
+      <div class="exp" hidden><b>ANSWER ${String.fromCharCode(65+q.a)}</b> · ${q.e}</div>`;
+    qs.appendChild(art);
+  });
+  $('result').hidden = true; $('result').innerHTML = '';
+  document.body.classList.remove('marked');
+  $('home').hidden = true; $('paper').hidden = false; $('bar').hidden = false;
+  updateCount(); window.scrollTo({top:0});
+  try{ history.replaceState(null,'',`#exam${exId}${v}`); }catch(e){}
+}
+
+function qEls(){ return [...document.querySelectorAll('#questions .q')]; }
+function answered(){ return qEls().filter(a => a.querySelector('input:checked')).length; }
+function updateCount(){ if(!document.body.classList.contains('marked')) $('score').textContent = `${answered()} of 20 answered`; }
+
+$('questions').addEventListener('change', updateCount);
+$('cards').addEventListener('click', e => { const b = e.target.closest('button[data-ex]'); if(b) openPaper(b.dataset.ex, b.dataset.v); });
+$('back').addEventListener('click', () => { $('paper').hidden = true; $('bar').hidden = true; $('home').hidden = false; renderHome(); try{ history.replaceState(null,'','#'); }catch(e){} window.scrollTo({top:0}); });
+
+$('mark').addEventListener('click', () => {
+  let right = 0; const byTopic = {};
+  qEls().forEach(a => {
+    const sel = a.querySelector('input:checked'); const key = +a.dataset.a;
+    const topic = a.querySelector('.tag').textContent; byTopic[topic] = byTopic[topic] || {r:0,n:0}; byTopic[topic].n++;
+    a.classList.add('marked'); a.querySelectorAll('label').forEach(l => l.classList.remove('sel','key'));
+    a.querySelectorAll('label')[key].classList.add('key');
+    if(sel){ sel.closest('label').classList.add('sel'); const ok = +sel.value === key; a.classList.toggle('right',ok); a.classList.toggle('wrong',!ok); if(ok){ right++; byTopic[topic].r++; } }
+    a.querySelector('.exp').hidden = false;
+  });
+  document.body.classList.add('marked');
+  const pct = Math.round(right/20*100);
+  $('score').innerHTML = `<strong>${right}/20</strong> · ${pct}% ${pct>=PASS?'· Pass':'· Below the 75% pass mark'}`;
+  $('result').innerHTML = `<h2>Result: ${right}/20 (${pct}%)</h2><div class="breakdown">${Object.entries(byTopic).map(([t,s])=>`<div>${t}<b>${s.r}/${s.n}</b></div>`).join('')}</div><p class="note">Explanations are now shown under every question. Weak topics above are where to spend your next study session.</p>`;
+  $('result').hidden = false;
+  setBest(current.ex, current.v, right);
+  $('result').scrollIntoView({behavior:'smooth'});
+});
+
+$('reset').addEventListener('click', () => {
+  qEls().forEach(a => { a.classList.remove('marked','right','wrong'); a.querySelectorAll('input').forEach(i => i.checked = false); a.querySelectorAll('label').forEach(l => l.classList.remove('sel','key')); a.querySelector('.exp').hidden = true; });
+  document.body.classList.remove('marked'); $('result').hidden = true; updateCount(); window.scrollTo({top:0,behavior:'smooth'});
+});
+
+renderHome();
+// deep link: #exam2b
+const m = (location.hash||'').match(/^#exam([123])([ab])$/);
+if(m) openPaper(m[1], m[2]);
+</script>
+</body>
+</html>
